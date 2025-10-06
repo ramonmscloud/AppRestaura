@@ -1,0 +1,400 @@
+/**
+ * Procesador de Imágenes
+ * Maneja la carga, manipulación y renderizado de imágenes en canvas
+ */
+
+class ImageProcessor {
+    constructor(originalCanvas, processedCanvas) {
+        this.originalCanvas = originalCanvas;
+        this.processedCanvas = processedCanvas;
+        this.originalCtx = originalCanvas.getContext('2d', { willReadFrequently: true });
+        this.processedCtx = processedCanvas.getContext('2d', { willReadFrequently: true });
+        
+        this.originalImage = null;
+        this.currentImageData = null;
+        this.history = [];
+        this.historyIndex = -1;
+        this.maxHistory = 20;
+        
+        // Estado de filtros actual
+        this.filterState = {
+            brightness: 0,
+            contrast: 0,
+            saturation: 0,
+            sharpness: 0,
+            denoise: 0,
+            temperature: 0
+        };
+    }
+
+    /**
+     * Carga una imagen desde un archivo
+     * @param {File} file - Archivo de imagen
+     * @returns {Promise} - Promesa que resuelve cuando la imagen está cargada
+     */
+    loadImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const img = new Image();
+                
+                img.onload = () => {
+                    this.originalImage = img;
+                    this.setupCanvases(img);
+                    this.saveState();
+                    resolve(img);
+                };
+                
+                img.onerror = () => {
+                    reject(new Error('Error al cargar la imagen'));
+                };
+                
+                img.src = e.target.result;
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Error al leer el archivo'));
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+
+    /**
+     * Configura los canvas con el tamaño de la imagen
+     * @param {HTMLImageElement} img - Imagen a cargar
+     */
+    setupCanvases(img) {
+        const maxWidth = 1920;
+        const maxHeight = 1080;
+        
+        let width = img.naturalWidth;
+        let height = img.naturalHeight;
+        
+        // Redimensionar si es necesario
+        if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.floor(width * ratio);
+            height = Math.floor(height * ratio);
+        }
+        
+        // Configurar ambos canvas
+        [this.originalCanvas, this.processedCanvas].forEach(canvas => {
+            canvas.width = width;
+            canvas.height = height;
+        });
+        
+        // Dibujar imagen original en ambos canvas
+        this.originalCtx.drawImage(img, 0, 0, width, height);
+        this.processedCtx.drawImage(img, 0, 0, width, height);
+        
+        // Guardar ImageData original
+        this.currentImageData = this.originalCtx.getImageData(0, 0, width, height);
+    }
+
+    /**
+     * Aplica todos los filtros actuales
+     */
+    applyAllFilters() {
+        if (!this.originalImage) return;
+        
+        // Obtener ImageData fresco del original
+        const width = this.originalCanvas.width;
+        const height = this.originalCanvas.height;
+        let imageData = this.originalCtx.getImageData(0, 0, width, height);
+        
+        // Crear una copia para no mutar el original
+        imageData = new ImageData(
+            new Uint8ClampedArray(imageData.data),
+            imageData.width,
+            imageData.height
+        );
+        
+        // Aplicar filtros en orden
+        if (this.filterState.brightness !== 0) {
+            Filters.brightness(imageData, this.filterState.brightness);
+        }
+        if (this.filterState.contrast !== 0) {
+            Filters.contrast(imageData, this.filterState.contrast);
+        }
+        if (this.filterState.saturation !== 0) {
+            Filters.saturation(imageData, this.filterState.saturation);
+        }
+        if (this.filterState.temperature !== 0) {
+            Filters.temperature(imageData, this.filterState.temperature);
+        }
+        if (this.filterState.denoise !== 0) {
+            Filters.denoise(imageData, this.filterState.denoise);
+        }
+        if (this.filterState.sharpness !== 0) {
+            Filters.sharpen(imageData, this.filterState.sharpness);
+        }
+        
+        // Actualizar canvas procesado
+        this.processedCtx.putImageData(imageData, 0, 0);
+        this.currentImageData = imageData;
+    }
+
+    /**
+     * Actualiza un filtro específico
+     * @param {string} filterName - Nombre del filtro
+     * @param {number} value - Valor del filtro
+     */
+    updateFilter(filterName, value) {
+        if (this.filterState.hasOwnProperty(filterName)) {
+            this.filterState[filterName] = value;
+            this.applyAllFilters();
+        }
+    }
+
+    /**
+     * Aplica un filtro rápido predefinido
+     * @param {string} filterType - Tipo de filtro (grayscale, sepia, vintage, enhance)
+     */
+    applyQuickFilter(filterType) {
+        if (!this.originalImage) return;
+        
+        const width = this.originalCanvas.width;
+        const height = this.originalCanvas.height;
+        let imageData = this.originalCtx.getImageData(0, 0, width, height);
+        
+        // Crear copia
+        imageData = new ImageData(
+            new Uint8ClampedArray(imageData.data),
+            imageData.width,
+            imageData.height
+        );
+        
+        // Aplicar filtro rápido
+        switch (filterType) {
+            case 'grayscale':
+                Filters.grayscale(imageData);
+                break;
+            case 'sepia':
+                Filters.sepia(imageData);
+                break;
+            case 'vintage':
+                Filters.vintage(imageData);
+                break;
+            case 'enhance':
+                Filters.autoEnhance(imageData);
+                break;
+        }
+        
+        // Actualizar canvas
+        this.processedCtx.putImageData(imageData, 0, 0);
+        this.currentImageData = imageData;
+        
+        // Resetear sliders ya que aplicamos un filtro completo
+        this.resetFilterState();
+        this.saveState();
+    },
+
+    /**
+     * Aplica una herramienta de restauración avanzada
+     * @param {string} toolType - Tipo de herramienta
+     * @param {Object} options - Opciones específicas de la herramienta
+     */
+    applyRestorationTool(toolType, options = {}) {
+        if (!this.originalImage) return;
+        
+        const width = this.processedCanvas.width;
+        const height = this.processedCanvas.height;
+        
+        // Obtener ImageData actual (procesado, no original)
+        let imageData = this.processedCtx.getImageData(0, 0, width, height);
+        
+        // Crear copia para no mutar
+        imageData = new ImageData(
+            new Uint8ClampedArray(imageData.data),
+            imageData.width,
+            imageData.height
+        );
+        
+        // Aplicar herramienta correspondiente
+        switch (toolType) {
+            case 'dustRemoval':
+                Filters.removeDustAndScratches(
+                    imageData, 
+                    options.threshold || 50, 
+                    options.radius || 2
+                );
+                break;
+                
+            case 'scratchRemoval':
+                Filters.removeScratches(imageData, options.strength || 50);
+                break;
+                
+            case 'stainRemoval':
+                Filters.removeStains(imageData, options.sensitivity || 50);
+                break;
+                
+            case 'smartRestore':
+                Filters.smartRestore(imageData);
+                break;
+                
+            case 'colorRestore':
+                Filters.colorRestore(imageData);
+                break;
+        }
+        
+        // Actualizar canvas
+        this.processedCtx.putImageData(imageData, 0, 0);
+        this.currentImageData = imageData;
+        
+        // Actualizar canvas original para que las herramientas subsecuentes trabajen sobre el resultado
+        this.originalCtx.putImageData(imageData, 0, 0);
+        
+        // Guardar estado
+        this.saveState();
+    },
+
+    /**
+     * Reinicia todos los filtros
+     */
+    resetFilters() {
+        if (!this.originalImage) return;
+        
+        this.resetFilterState();
+        
+        // Restaurar imagen original
+        const width = this.originalCanvas.width;
+        const height = this.originalCanvas.height;
+        this.processedCtx.drawImage(this.originalCanvas, 0, 0);
+        this.currentImageData = this.originalCtx.getImageData(0, 0, width, height);
+    },
+
+    /**
+     * Reinicia el estado de filtros a valores por defecto
+     */
+    resetFilterState() {
+        for (let key in this.filterState) {
+            this.filterState[key] = 0;
+        }
+    },
+
+    /**
+     * Guarda el estado actual en el historial
+     */
+    saveState() {
+        if (!this.currentImageData) return;
+        
+        // Eliminar estados futuros si estamos en medio del historial
+        if (this.historyIndex < this.history.length - 1) {
+            this.history = this.history.slice(0, this.historyIndex + 1);
+        }
+        
+        // Guardar estado
+        const state = {
+            imageData: new ImageData(
+                new Uint8ClampedArray(this.currentImageData.data),
+                this.currentImageData.width,
+                this.currentImageData.height
+            ),
+            filterState: { ...this.filterState }
+        };
+        
+        this.history.push(state);
+        this.historyIndex++;
+        
+        // Limitar historial
+        if (this.history.length > this.maxHistory) {
+            this.history.shift();
+            this.historyIndex--;
+        }
+    },
+
+    /**
+     * Deshace la última acción
+     * @returns {boolean} - true si se pudo deshacer
+     */
+    undo() {
+        if (this.historyIndex > 0) {
+            this.historyIndex--;
+            const state = this.history[this.historyIndex];
+            this.restoreState(state);
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Restaura un estado del historial
+     * @param {Object} state - Estado a restaurar
+     */
+    restoreState(state) {
+        this.currentImageData = new ImageData(
+            new Uint8ClampedArray(state.imageData.data),
+            state.imageData.width,
+            state.imageData.height
+        );
+        this.filterState = { ...state.filterState };
+        this.processedCtx.putImageData(this.currentImageData, 0, 0);
+    },
+
+    /**
+     * Reinicia completamente la imagen
+     */
+    reset() {
+        if (!this.originalImage) return;
+        
+        this.resetFilters();
+        this.history = [];
+        this.historyIndex = -1;
+        this.saveState();
+    },
+
+    /**
+     * Obtiene el canvas procesado
+     * @returns {HTMLCanvasElement}
+     */
+    getProcessedCanvas() {
+        return this.processedCanvas;
+    },
+
+    /**
+     * Obtiene el canvas original
+     * @returns {HTMLCanvasElement}
+     */
+    getOriginalCanvas() {
+        return this.originalCanvas;
+    },
+
+    /**
+     * Obtiene información de la imagen
+     * @returns {Object}
+     */
+    getImageInfo() {
+        if (!this.originalImage) return null;
+        
+        return {
+            width: this.originalCanvas.width,
+            height: this.originalCanvas.height,
+            originalWidth: this.originalImage.naturalWidth,
+            originalHeight: this.originalImage.naturalHeight,
+            aspectRatio: this.originalCanvas.width / this.originalCanvas.height
+        };
+    },
+
+    /**
+     * Verifica si hay cambios sin guardar
+     * @returns {boolean}
+     */
+    hasUnsavedChanges() {
+        return this.historyIndex > 0;
+    },
+
+    /**
+     * Verifica si se puede deshacer
+     * @returns {boolean}
+     */
+    canUndo() {
+        return this.historyIndex > 0;
+    }
+}
+
+// Exportar para uso en otros módulos
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ImageProcessor;
+}
