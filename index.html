@@ -74,6 +74,9 @@
                     <button id="cropBtn" class="btn-secondary" title="Recortar imagen">
                         <span>✂️</span> Recortar
                     </button>
+                    <button id="healBtn" class="btn-secondary" title="Reparar defectos">
+                        <span>🩹</span> Reparar
+                    </button>
                     <button id="compareBtn" class="btn-secondary" title="Comparar antes/después">
                         <span>👁️</span> Comparar
                     </button>
@@ -131,6 +134,33 @@
                         </button>
                         <button id="cropCancelBtn" class="btn-secondary">
                             <span>✕</span> Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Healing Controls (hidden by default) -->
+                <div id="healingControls" class="healing-controls hidden">
+                    <div class="healing-controls-header">
+                        <h4>🩹 Herramienta de Reparación</h4>
+                        <p>Click o arrastra sobre defectos para eliminarlos</p>
+                    </div>
+                    <div class="healing-brush-size">
+                        <label for="healBrushSlider" class="control-label">
+                            <span>🖌️ Tamaño del Pincel</span>
+                            <span id="healBrushValue" class="control-value">20</span>
+                        </label>
+                        <input type="range" id="healBrushSlider" class="slider" 
+                               min="5" max="100" value="20" step="1">
+                    </div>
+                    <div class="healing-actions">
+                        <button id="healUndoBtn" class="btn-secondary">
+                            <span>↶</span> Deshacer Último
+                        </button>
+                        <button id="healResetBtn" class="btn-secondary">
+                            <span>↺</span> Resetear Todo
+                        </button>
+                        <button id="healDoneBtn" class="btn-primary">
+                            <span>✓</span> Finalizar
                         </button>
                     </div>
                 </div>
@@ -279,6 +309,7 @@
     <script src="js/utils.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/crop-tool.js"></script>
+    <script src="js/healing-tool.js"></script>
     <script src="js/image-processor.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>

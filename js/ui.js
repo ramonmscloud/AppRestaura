@@ -7,6 +7,7 @@ const UI = {
     elements: {},
     processor: null,
     cropTool: null,
+    healingTool: null,
     isComparing: false,
     compareSliderPosition: 50,
 
@@ -14,10 +15,12 @@ const UI = {
      * Inicializa la interfaz de usuario
      * @param {ImageProcessor} processor - Procesador de imágenes
      * @param {CropTool} cropTool - Herramienta de recorte
+     * @param {HealingTool} healingTool - Herramienta de reparación
      */
-    init(processor, cropTool) {
+    init(processor, cropTool, healingTool) {
         this.processor = processor;
         this.cropTool = cropTool;
+        this.healingTool = healingTool;
         this.cacheElements();
         this.setupEventListeners();
         this.loadTheme();
@@ -48,6 +51,7 @@ const UI = {
             resetBtn: document.getElementById('resetBtn'),
             undoBtn: document.getElementById('undoBtn'),
             cropBtn: document.getElementById('cropBtn'),
+            healBtn: document.getElementById('healBtn'),
             compareBtn: document.getElementById('compareBtn'),
             downloadBtn: document.getElementById('downloadBtn'),
             newImageBtn: document.getElementById('newImageBtn'),
@@ -57,6 +61,14 @@ const UI = {
             cropRatioBtns: document.querySelectorAll('.crop-ratio-btn'),
             cropApplyBtn: document.getElementById('cropApplyBtn'),
             cropCancelBtn: document.getElementById('cropCancelBtn'),
+            
+            // Healing controls
+            healingControls: document.getElementById('healingControls'),
+            healBrushSlider: document.getElementById('healBrushSlider'),
+            healBrushValue: document.getElementById('healBrushValue'),
+            healUndoBtn: document.getElementById('healUndoBtn'),
+            healResetBtn: document.getElementById('healResetBtn'),
+            healDoneBtn: document.getElementById('healDoneBtn'),
             
             // Controls
             brightnessSlider: document.getElementById('brightnessSlider'),
@@ -123,6 +135,7 @@ const UI = {
         this.elements.resetBtn.addEventListener('click', () => this.handleReset());
         this.elements.undoBtn.addEventListener('click', () => this.handleUndo());
         this.elements.cropBtn.addEventListener('click', () => this.handleCropToggle());
+        this.elements.healBtn.addEventListener('click', () => this.handleHealToggle());
         this.elements.compareBtn.addEventListener('click', () => this.toggleCompare());
         this.elements.downloadBtn.addEventListener('click', () => this.handleDownload());
         this.elements.newImageBtn.addEventListener('click', () => this.handleNewImage());
@@ -133,6 +146,16 @@ const UI = {
         });
         this.elements.cropApplyBtn.addEventListener('click', () => this.handleCropApply());
         this.elements.cropCancelBtn.addEventListener('click', () => this.handleCropCancel());
+        
+        // Healing controls
+        this.elements.healBrushSlider.addEventListener('input', (e) => {
+            const size = parseInt(e.target.value);
+            this.elements.healBrushValue.textContent = size;
+            this.healingTool.setBrushSize(size);
+        });
+        this.elements.healUndoBtn.addEventListener('click', () => this.handleHealUndo());
+        this.elements.healResetBtn.addEventListener('click', () => this.handleHealReset());
+        this.elements.healDoneBtn.addEventListener('click', () => this.handleHealDone());
         
         // Sliders con debounce para mejor rendimiento
         const handleSliderChange = Utils.debounce((slider, filterName, valueElement) => {
@@ -549,6 +572,83 @@ const UI = {
                 btn.classList.add('active');
             }
         });
+    },
+
+    /**
+     * Activa/desactiva la herramienta de reparación
+     */
+    handleHealToggle() {
+        console.log('handleHealToggle called. healingTool:', this.healingTool);
+        console.log('isActive:', this.healingTool?.isActive);
+        
+        if (!this.healingTool || !this.healingTool.isActive) {
+            // Activar healing
+            console.log('Activating healing tool...');
+            this.healingTool.activate();
+            this.elements.healingControls.classList.remove('hidden');
+            this.elements.healBtn.classList.add('active');
+            
+            // Desactivar otras herramientas
+            if (this.cropTool && this.cropTool.isActive) {
+                this.handleCropCancel();
+            }
+            if (this.isComparing) {
+                this.toggleCompare();
+            }
+            
+            Utils.showToast('🩹 Click o arrastra sobre defectos para repararlos');
+        } else {
+            // Desactivar healing
+            console.log('Deactivating healing tool...');
+            this.handleHealDone();
+        }
+    },
+
+    /**
+     * Deshace la última acción de reparación
+     */
+    handleHealUndo() {
+        const success = this.healingTool.undo();
+        if (success) {
+            Utils.showToast('↶ Reparación deshecha');
+        } else {
+            Utils.showToast('ℹ️ Vuelto al estado original', 'info');
+        }
+    },
+
+    /**
+     * Resetea todas las reparaciones
+     */
+    handleHealReset() {
+        if (!confirm('¿Resetear todas las reparaciones?')) return;
+        
+        this.healingTool.reset();
+        Utils.showToast('↺ Reparaciones reseteadas');
+    },
+
+    /**
+     * Finaliza y aplica las reparaciones
+     */
+    handleHealDone() {
+        // Guardar el estado actual en el procesador
+        const healedCanvas = this.healingTool.getCanvas();
+        const imageData = healedCanvas.getContext('2d').getImageData(
+            0, 0, healedCanvas.width, healedCanvas.height
+        );
+        
+        // Actualizar el procesador con la imagen reparada
+        this.processor.currentImageData = imageData;
+        this.processor.saveState();
+        
+        // Desactivar herramienta
+        this.healingTool.deactivate();
+        this.elements.healingControls.classList.add('hidden');
+        this.elements.healBtn.classList.remove('active');
+        
+        // Actualizar botón de deshacer
+        this.elements.undoBtn.disabled = !this.processor.canUndo();
+        
+        Utils.showToast('✓ Reparaciones aplicadas correctamente');
     },
 
     /**

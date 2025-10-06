@@ -18,18 +18,33 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
   - Restricciones de tamaño mínimo y límites del canvas
   - Integración completa con el historial de deshacer
 
+- **🩹 Herramienta de Reparación (Healing Tool)**
+  - Eliminación de manchas, defectos y rasguños
+  - Pincel ajustable (5-100px)
+  - Algoritmo de sanado por promedio de píxeles circundantes
+  - Cursor personalizado que muestra el tamaño del pincel
+  - Deshacer operaciones individuales
+  - Reset completo a estado original
+  - Soporte táctil para dispositivos móviles
+  - Historial de hasta 10 operaciones de reparación
+
 ### 🛠️ Técnico
 - Nueva clase `CropTool` modular e independiente
+- Nueva clase `HealingTool` para restauración de defectos
 - Método `crop()` en `ImageProcessor` con validación
-- Estilos CSS completos para overlay y controles
-- Event listeners para mouse y touch
+- Algoritmo de healing basado en muestreo circular
+- Estilos CSS completos para overlay, controles y cursor
+- Event listeners para mouse y touch en ambas herramientas
 - Actualización automática de dimensiones tras recorte
 
 ### 🎨 Interfaz
 - Botón "Recortar" en la barra de herramientas
+- Botón "Reparar" en la barra de herramientas
 - Panel de controles con ratios de aspecto
+- Panel de controles de reparación con slider de tamaño
 - Indicadores visuales (handles en las esquinas, ícono central)
-- Botones "Aplicar" y "Cancelar" con retroalimentación
+- Cursor circular personalizado para herramienta de reparación
+- Botones "Aplicar", "Cancelar", "Deshacer", "Resetear" con retroalimentación
 
 ## [1.0.0] - 2025-10-06
 

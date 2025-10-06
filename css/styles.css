@@ -839,3 +839,74 @@ input, select, textarea {
     flex: 1;
     max-width: 200px;
 }
+
+/* ============================================
+   HEALING TOOL STYLES
+   ============================================ */
+
+.healing-cursor {
+    position: fixed;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    background-color: rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 1px white, 0 0 10px rgba(59, 130, 246, 0.5);
+    transform: translate(-50%, -50%);
+}
+
+.healing-controls {
+    background-color: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-top: var(--space-md);
+    box-shadow: var(--shadow-md);
+}
+
+.healing-controls.hidden {
+    display: none;
+}
+
+.healing-controls-header {
+    text-align: center;
+    margin-bottom: var(--space-md);
+}
+
+.healing-controls-header h4 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-xs);
+    color: var(--text-primary);
+}
+
+.healing-controls-header p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.healing-brush-size {
+    margin-bottom: var(--space-md);
+}
+
+.healing-brush-size .control-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.healing-brush-size .slider {
+    width: 100%;
+}
+
+.healing-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.healing-actions button {
+    flex: 1;
+    min-width: 120px;
+}

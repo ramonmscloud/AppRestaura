@@ -7,6 +7,7 @@
 const App = {
     processor: null,
     cropTool: null,
+    healingTool: null,
     initialized: false,
 
     /**
@@ -41,8 +42,12 @@ const App = {
             this.cropTool = new CropTool();
             this.cropTool.init(processedCanvas, cropOverlay, cropArea);
 
+            // Inicializar herramienta de reparación
+            this.healingTool = new HealingTool();
+            this.healingTool.init(processedCanvas);
+
             // Inicializar UI
-            UI.init(this.processor, this.cropTool);
+            UI.init(this.processor, this.cropTool, this.healingTool);
 
             // Marcar como inicializada
             this.initialized = true;
