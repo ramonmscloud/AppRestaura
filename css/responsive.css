@@ -1,0 +1,215 @@
+/* ==========================================
+   Responsive Design
+   ========================================== */
+
+/* Tablet y Móviles */
+@media (max-width: 1024px) {
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .toolbar {
+        justify-content: center;
+    }
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+    :root {
+        --font-size-xs: 0.7rem;
+        --font-size-sm: 0.8rem;
+        --font-size-base: 0.9rem;
+        --font-size-lg: 1rem;
+        --font-size-xl: 1.125rem;
+        --font-size-2xl: 1.25rem;
+        --font-size-3xl: 1.5rem;
+    }
+    
+    .container {
+        padding: 0 var(--space-md);
+    }
+    
+    .header {
+        padding: var(--space-sm) 0;
+    }
+    
+    .logo h1 {
+        font-size: var(--font-size-lg);
+    }
+    
+    .main {
+        padding: var(--space-lg) 0;
+    }
+    
+    .upload-section {
+        padding: var(--space-xl) 0;
+    }
+    
+    .upload-area {
+        padding: var(--space-xl);
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+    }
+    
+    .upload-content h2 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .toolbar {
+        gap: var(--space-xs);
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: var(--space-xs) var(--space-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .btn-primary span, .btn-secondary span {
+        display: none;
+    }
+    
+    .canvas-wrapper {
+        min-height: 300px;
+    }
+    
+    .canvas {
+        max-height: 50vh;
+    }
+    
+    .canvas-info {
+        flex-direction: column;
+        gap: var(--space-xs);
+        font-size: var(--font-size-xs);
+    }
+    
+    .controls-panel {
+        padding: var(--space-md);
+    }
+    
+    .controls-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+    
+    .quick-filters {
+        justify-content: center;
+    }
+    
+    .filter-btn {
+        font-size: var(--font-size-xs);
+        padding: var(--space-xs) var(--space-sm);
+    }
+    
+    .modal-content {
+        max-height: 90vh;
+        margin: var(--space-md);
+    }
+    
+    .modal-header {
+        padding: var(--space-md);
+    }
+    
+    .modal-body {
+        padding: var(--space-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .toast {
+        bottom: var(--space-md);
+        right: var(--space-md);
+        left: var(--space-md);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .logo-icon {
+        font-size: var(--font-size-xl);
+    }
+    
+    .upload-area {
+        padding: var(--space-lg);
+    }
+    
+    .controls-grid {
+        gap: var(--space-md);
+    }
+    
+    .quick-filters {
+        flex-direction: column;
+    }
+    
+    .filter-btn {
+        width: 100%;
+    }
+}
+
+/* Landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    .canvas {
+        max-height: 60vh;
+    }
+    
+    .upload-area {
+        padding: var(--space-lg);
+    }
+}
+
+/* Mejoras para tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .controls-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Pantallas grandes */
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    .controls-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Modo impresión */
+@media print {
+    .header, .footer, .toolbar, .controls-panel {
+        display: none;
+    }
+    
+    .canvas-wrapper {
+        page-break-inside: avoid;
+    }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark mode automático del sistema */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --background: #111827;
+        --surface: #1f2937;
+        --surface-elevated: #374151;
+        --border: #374151;
+        --border-light: #4b5563;
+        
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --text-tertiary: #9ca3af;
+        
+        --primary-light: #1e3a8a;
+    }
+}

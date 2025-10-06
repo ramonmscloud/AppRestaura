@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Restauración de imágenes antiguas 100% en tu navegador. Privacidad total, sin servidores.">
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+                   script-src 'self' https://cdn.jsdelivr.net; 
+                   style-src 'self' 'unsafe-inline';
+                   img-src 'self' data: blob:;">
+    <title>AppRestaura - Restauración de Imágenes Antiguas</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Pica.js para redimensionamiento de alta calidad -->
+    <script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🖼️</span>
+                    <h1>AppRestaura</h1>
+                </div>
+                <nav class="nav">
+                    <button id="themeToggle" class="btn-icon" title="Cambiar tema" aria-label="Cambiar tema">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button id="helpBtn" class="btn-icon" title="Ayuda" aria-label="Ayuda">
+                        <span>❓</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <span class="upload-icon">📁</span>
+                        <h2>Arrastra tu imagen aquí</h2>
+                        <p>o</p>
+                        <label for="fileInput" class="btn-primary">
+                            Seleccionar Imagen
+                        </label>
+                        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp" hidden>
+                        <p class="upload-info">JPG, PNG, WEBP o BMP • Máx. 10MB</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Editor Section -->
+            <section class="editor-section hidden" id="editorSection">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <button id="resetBtn" class="btn-secondary" title="Reiniciar imagen">
+                        <span>↺</span> Reiniciar
+                    </button>
+                    <button id="undoBtn" class="btn-secondary" title="Deshacer" disabled>
+                        <span>↶</span> Deshacer
+                    </button>
+                    <button id="compareBtn" class="btn-secondary" title="Comparar antes/después">
+                        <span>👁️</span> Comparar
+                    </button>
+                    <button id="downloadBtn" class="btn-primary" title="Descargar imagen">
+                        <span>💾</span> Descargar
+                    </button>
+                    <button id="newImageBtn" class="btn-secondary" title="Cargar nueva imagen">
+                        <span>📁</span> Nueva
+                    </button>
+                </div>
+
+                <!-- Canvas Area -->
+                <div class="canvas-container">
+                    <div class="canvas-wrapper">
+                        <canvas id="originalCanvas" class="canvas"></canvas>
+                        <canvas id="processedCanvas" class="canvas"></canvas>
+                        <div class="compare-slider hidden" id="compareSlider">
+                            <div class="slider-handle">
+                                <span>⟷</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="canvas-info" id="canvasInfo">
+                        <span id="imageDimensions"></span>
+                        <span id="imageSize"></span>
+                    </div>
+                </div>
+
+                <!-- Controls Panel -->
+                <div class="controls-panel">
+                    <div class="controls-header">
+                        <h3>Ajustes de Restauración</h3>
+                        <button id="resetFiltersBtn" class="btn-text">Restablecer Todo</button>
+                    </div>
+
+                    <div class="controls-grid">
+                        <!-- Brillo -->
+                        <div class="control-group">
+                            <label for="brightnessSlider" class="control-label">
+                                <span>☀️ Brillo</span>
+                                <span id="brightnessValue" class="control-value">0</span>
+                            </label>
+                            <input type="range" id="brightnessSlider" class="slider" 
+                                   min="-100" max="100" value="0" step="1">
+                        </div>
+
+                        <!-- Contraste -->
+                        <div class="control-group">
+                            <label for="contrastSlider" class="control-label">
+                                <span>◐ Contraste</span>
+                                <span id="contrastValue" class="control-value">0</span>
+                            </label>
+                            <input type="range" id="contrastSlider" class="slider" 
+                                   min="-100" max="100" value="0" step="1">
+                        </div>
+
+                        <!-- Saturación -->
+                        <div class="control-group">
+                            <label for="saturationSlider" class="control-label">
+                                <span>🎨 Saturación</span>
+                                <span id="saturationValue" class="control-value">0</span>
+                            </label>
+                            <input type="range" id="saturationSlider" class="slider" 
+                                   min="-100" max="100" value="0" step="1">
+                        </div>
+
+                        <!-- Nitidez -->
+                        <div class="control-group">
+                            <label for="sharpnessSlider" class="control-label">
+                                <span>🔍 Nitidez</span>
+                                <span id="sharpnessValue" class="control-value">0</span>
+                            </label>
+                            <input type="range" id="sharpnessSlider" class="slider" 
+                                   min="0" max="100" value="0" step="1">
+                        </div>
+
+                        <!-- Reducción de Ruido -->
+                        <div class="control-group">
+                            <label for="denoiseSlider" class="control-label">
+                                <span>✨ Reducción de Ruido</span>
+                                <span id="denoiseValue" class="control-value">0</span>
+                            </label>
+                            <input type="range" id="denoiseSlider" class="slider" 
+                                   min="0" max="100" value="0" step="1">
+                        </div>
+
+                        <!-- Temperatura de Color -->
+                        <div class="control-group">
+                            <label for="temperatureSlider" class="control-label">
+                                <span>🌡️ Temperatura</span>
+                                <span id="temperatureValue" class="control-value">0</span>
+                            </label>
+                            <input type="range" id="temperatureSlider" class="slider" 
+                                   min="-100" max="100" value="0" step="1">
+                        </div>
+
+                        <!-- Filtros Rápidos -->
+                        <div class="control-group full-width">
+                            <label class="control-label">
+                                <span>🎭 Filtros Rápidos</span>
+                            </label>
+                            <div class="quick-filters">
+                                <button class="filter-btn" data-filter="grayscale">Escala de Grises</button>
+                                <button class="filter-btn" data-filter="sepia">Sepia</button>
+                                <button class="filter-btn" data-filter="vintage">Vintage</button>
+                                <button class="filter-btn" data-filter="enhance">Auto-Mejorar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                🔒 Todas las imágenes se procesan localmente en tu navegador. 
+                Nunca se envían a ningún servidor.
+            </p>
+            <p class="footer-links">
+                <a href="https://github.com/tu-usuario/AppRestaura" target="_blank" rel="noopener">GitHub</a> • 
+                <a href="#" id="privacyLink">Privacidad</a> • 
+                <span>v1.0.0</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal de Ayuda -->
+    <div class="modal hidden" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💡 Cómo usar AppRestaura</h2>
+                <button class="modal-close" id="closeHelpModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li><strong>Carga una imagen:</strong> Arrastra una foto antigua o haz clic en "Seleccionar Imagen"</li>
+                    <li><strong>Ajusta los controles:</strong> Usa los deslizadores para mejorar brillo, contraste, saturación, etc.</li>
+                    <li><strong>Prueba filtros rápidos:</strong> Aplica efectos predefinidos con un clic</li>
+                    <li><strong>Compara resultados:</strong> Usa el botón "Comparar" para ver antes y después</li>
+                    <li><strong>Descarga:</strong> Guarda tu imagen restaurada en alta calidad</li>
+                </ol>
+                <div class="tips">
+                    <h3>✨ Consejos:</h3>
+                    <ul>
+                        <li>Ajusta el brillo y contraste primero para mejorar la visibilidad</li>
+                        <li>Usa la reducción de ruido para fotos con grano</li>
+                        <li>La nitidez puede ayudar a recuperar detalles borrosos</li>
+                        <li>Experimenta con diferentes combinaciones</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast hidden" id="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading hidden" id="loading">
+        <div class="spinner"></div>
+        <p>Procesando imagen...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/image-processor.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

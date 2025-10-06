@@ -1,0 +1,32 @@
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Optional: si decides usar Node.js para desarrollo
+node_modules/
+dist/
+.cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build files (si usas un bundler)
+build/
+out/
+
+# Environment files
+.env
+.env.local
