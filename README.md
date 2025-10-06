@@ -6,6 +6,7 @@ Aplicación web moderna y eficiente para la restauración y mejora de imágenes 
 
 - ✅ **100% Client-Side**: Todo el procesamiento ocurre en tu navegador
 - 🚀 **Alto Rendimiento**: Optimizado para operaciones rápidas
+- ✂️ **Herramienta de Recorte**: Selección interactiva con ratios de aspecto
 - 📱 **Responsive**: Funciona en desktop, tablet y móvil
 - 🎨 **Múltiples Filtros**: Brillo, contraste, saturación, nitidez y más
 - 🔒 **Privacidad Total**: Tus imágenes nunca salen de tu dispositivo

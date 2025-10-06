@@ -71,6 +71,9 @@
                     <button id="undoBtn" class="btn-secondary" title="Deshacer" disabled>
                         <span>↶</span> Deshacer
                     </button>
+                    <button id="cropBtn" class="btn-secondary" title="Recortar imagen">
+                        <span>✂️</span> Recortar
+                    </button>
                     <button id="compareBtn" class="btn-secondary" title="Comparar antes/después">
                         <span>👁️</span> Comparar
                     </button>
@@ -92,10 +95,43 @@
                                 <span>⟷</span>
                             </div>
                         </div>
+                        <!-- Crop Overlay -->
+                        <div id="cropOverlay" class="crop-overlay hidden">
+                            <div id="cropArea" class="crop-area">
+                                <div class="crop-handle crop-handle-nw"></div>
+                                <div class="crop-handle crop-handle-ne"></div>
+                                <div class="crop-handle crop-handle-sw"></div>
+                                <div class="crop-handle crop-handle-se"></div>
+                                <div class="crop-center">✂️</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="canvas-info" id="canvasInfo">
                         <span id="imageDimensions"></span>
                         <span id="imageSize"></span>
+                    </div>
+                </div>
+
+                <!-- Crop Controls (hidden by default) -->
+                <div id="cropControls" class="crop-controls hidden">
+                    <div class="crop-controls-header">
+                        <h4>🎯 Herramienta de Recorte</h4>
+                        <p>Arrastra el área o las esquinas para ajustar</p>
+                    </div>
+                    <div class="crop-aspect-ratios">
+                        <button class="crop-ratio-btn active" data-ratio="free">Libre</button>
+                        <button class="crop-ratio-btn" data-ratio="1:1">1:1</button>
+                        <button class="crop-ratio-btn" data-ratio="4:3">4:3</button>
+                        <button class="crop-ratio-btn" data-ratio="16:9">16:9</button>
+                        <button class="crop-ratio-btn" data-ratio="3:2">3:2</button>
+                    </div>
+                    <div class="crop-actions">
+                        <button id="cropApplyBtn" class="btn-primary">
+                            <span>✓</span> Aplicar Recorte
+                        </button>
+                        <button id="cropCancelBtn" class="btn-secondary">
+                            <span>✕</span> Cancelar
+                        </button>
                     </div>
                 </div>
 
@@ -242,6 +278,7 @@
     <!-- Scripts -->
     <script src="js/utils.js"></script>
     <script src="js/filters.js"></script>
+    <script src="js/crop-tool.js"></script>
     <script src="js/image-processor.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>

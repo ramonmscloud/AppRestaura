@@ -5,6 +5,32 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.1.0] - 2025-10-06
+
+### ✨ Añadido
+- **🎯 Herramienta de Recorte (Crop Tool)**
+  - Selección interactiva de área de recorte
+  - Arrastre del área completa
+  - Redimensionamiento desde las esquinas
+  - 5 ratios de aspecto predefinidos: Libre, 1:1, 4:3, 16:9, 3:2
+  - Soporte táctil para dispositivos móviles
+  - Overlay semi-transparente para previsualización
+  - Restricciones de tamaño mínimo y límites del canvas
+  - Integración completa con el historial de deshacer
+
+### 🛠️ Técnico
+- Nueva clase `CropTool` modular e independiente
+- Método `crop()` en `ImageProcessor` con validación
+- Estilos CSS completos para overlay y controles
+- Event listeners para mouse y touch
+- Actualización automática de dimensiones tras recorte
+
+### 🎨 Interfaz
+- Botón "Recortar" en la barra de herramientas
+- Panel de controles con ratios de aspecto
+- Indicadores visuales (handles en las esquinas, ícono central)
+- Botones "Aplicar" y "Cancelar" con retroalimentación
+
 ## [1.0.0] - 2025-10-06
 
 ### ✨ Añadido

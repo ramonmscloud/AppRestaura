@@ -6,6 +6,7 @@
 // Estado global de la aplicación
 const App = {
     processor: null,
+    cropTool: null,
     initialized: false,
 
     /**
@@ -33,8 +34,15 @@ const App = {
             
             this.processor = new ImageProcessor(originalCanvas, processedCanvas);
 
+            // Inicializar herramienta de recorte
+            const cropOverlay = document.getElementById('cropOverlay');
+            const cropArea = document.getElementById('cropArea');
+            
+            this.cropTool = new CropTool();
+            this.cropTool.init(processedCanvas, cropOverlay, cropArea);
+
             // Inicializar UI
-            UI.init(this.processor);
+            UI.init(this.processor, this.cropTool);
 
             // Marcar como inicializada
             this.initialized = true;

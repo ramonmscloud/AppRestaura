@@ -333,6 +333,52 @@ class ImageProcessor {
     canUndo() {
         return this.historyIndex > 0;
     }
+
+    /**
+     * Recorta la imagen según el área especificada
+     * @param {Object} cropData - Datos del recorte {x, y, width, height}
+     */
+    crop(cropData) {
+        if (!this.currentImageData || !cropData) return;
+
+        const { x, y, width, height } = cropData;
+
+        // Validar dimensiones
+        if (width <= 0 || height <= 0) {
+            throw new Error('Dimensiones de recorte inválidas');
+        }
+
+        // Crear canvas temporal con la imagen actual
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = this.processedCanvas.width;
+        tempCanvas.height = this.processedCanvas.height;
+        tempCtx.putImageData(this.currentImageData, 0, 0);
+
+        // Redimensionar canvas al nuevo tamaño
+        this.processedCanvas.width = width;
+        this.processedCanvas.height = height;
+        this.originalCanvas.width = width;
+        this.originalCanvas.height = height;
+
+        // Dibujar la porción recortada
+        this.processedCtx.drawImage(
+            tempCanvas,
+            x, y, width, height,  // Área de origen
+            0, 0, width, height   // Área de destino
+        );
+
+        // Actualizar la imagen original también
+        this.originalCtx.drawImage(this.processedCanvas, 0, 0);
+
+        // Actualizar currentImageData
+        this.currentImageData = this.processedCtx.getImageData(
+            0, 0, width, height
+        );
+
+        // Guardar en historial
+        this.saveState();
+    }
 }
 
 // Exportar para uso en otros módulos

@@ -6,15 +6,18 @@
 const UI = {
     elements: {},
     processor: null,
+    cropTool: null,
     isComparing: false,
     compareSliderPosition: 50,
 
     /**
      * Inicializa la interfaz de usuario
      * @param {ImageProcessor} processor - Procesador de imágenes
+     * @param {CropTool} cropTool - Herramienta de recorte
      */
-    init(processor) {
+    init(processor, cropTool) {
         this.processor = processor;
+        this.cropTool = cropTool;
         this.cacheElements();
         this.setupEventListeners();
         this.loadTheme();
@@ -44,9 +47,16 @@ const UI = {
             // Toolbar
             resetBtn: document.getElementById('resetBtn'),
             undoBtn: document.getElementById('undoBtn'),
+            cropBtn: document.getElementById('cropBtn'),
             compareBtn: document.getElementById('compareBtn'),
             downloadBtn: document.getElementById('downloadBtn'),
             newImageBtn: document.getElementById('newImageBtn'),
+            
+            // Crop controls
+            cropControls: document.getElementById('cropControls'),
+            cropRatioBtns: document.querySelectorAll('.crop-ratio-btn'),
+            cropApplyBtn: document.getElementById('cropApplyBtn'),
+            cropCancelBtn: document.getElementById('cropCancelBtn'),
             
             // Controls
             brightnessSlider: document.getElementById('brightnessSlider'),
@@ -112,9 +122,17 @@ const UI = {
         // Toolbar
         this.elements.resetBtn.addEventListener('click', () => this.handleReset());
         this.elements.undoBtn.addEventListener('click', () => this.handleUndo());
+        this.elements.cropBtn.addEventListener('click', () => this.handleCropToggle());
         this.elements.compareBtn.addEventListener('click', () => this.toggleCompare());
         this.elements.downloadBtn.addEventListener('click', () => this.handleDownload());
         this.elements.newImageBtn.addEventListener('click', () => this.handleNewImage());
+        
+        // Crop controls
+        this.elements.cropRatioBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleCropRatioChange(e.target));
+        });
+        this.elements.cropApplyBtn.addEventListener('click', () => this.handleCropApply());
+        this.elements.cropCancelBtn.addEventListener('click', () => this.handleCropCancel());
         
         // Sliders con debounce para mejor rendimiento
         const handleSliderChange = Utils.debounce((slider, filterName, valueElement) => {
@@ -440,6 +458,97 @@ const UI = {
      */
     hideHelp() {
         this.elements.helpModal.classList.add('hidden');
+    },
+
+    /**
+     * Activa/desactiva la herramienta de recorte
+     */
+    handleCropToggle() {
+        if (!this.cropTool || !this.cropTool.isActive) {
+            // Activar crop
+            this.cropTool.activate();
+            this.elements.cropControls.classList.remove('hidden');
+            this.elements.cropBtn.classList.add('active');
+            
+            // Desactivar comparación si está activa
+            if (this.isComparing) {
+                this.toggleCompare();
+            }
+            
+            Utils.showToast('🎯 Ajusta el área de recorte');
+        } else {
+            // Desactivar crop
+            this.handleCropCancel();
+        }
+    },
+
+    /**
+     * Cambia el ratio de aspecto del crop
+     */
+    handleCropRatioChange(button) {
+        // Actualizar botones activos
+        this.elements.cropRatioBtns.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Obtener ratio
+        const ratio = button.dataset.ratio;
+        
+        // Aplicar ratio al crop tool
+        if (ratio === 'free') {
+            this.cropTool.setAspectRatio(null);
+        } else {
+            this.cropTool.setAspectRatio(ratio);
+        }
+    },
+
+    /**
+     * Aplica el recorte
+     */
+    handleCropApply() {
+        try {
+            const cropData = this.cropTool.getCropData();
+            
+            if (!cropData) {
+                Utils.showToast('❌ Error al obtener datos de recorte', 'error');
+                return;
+            }
+            
+            // Aplicar recorte
+            this.processor.crop(cropData);
+            
+            // Desactivar herramienta
+            this.cropTool.deactivate();
+            this.elements.cropControls.classList.add('hidden');
+            this.elements.cropBtn.classList.remove('active');
+            
+            // Actualizar botón de deshacer
+            this.elements.undoBtn.disabled = !this.processor.canUndo();
+            
+            // Actualizar información
+            this.updateImageInfo();
+            
+            Utils.showToast('✂️ Imagen recortada correctamente');
+        } catch (error) {
+            console.error('Error al aplicar recorte:', error);
+            Utils.showToast('❌ Error al recortar imagen', 'error');
+        }
+    },
+
+    /**
+     * Cancela el recorte
+     */
+    handleCropCancel() {
+        this.cropTool.deactivate();
+        this.elements.cropControls.classList.add('hidden');
+        this.elements.cropBtn.classList.remove('active');
+        
+        // Resetear botones de ratio
+        this.elements.cropRatioBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.ratio === 'free') {
+                btn.classList.add('active');
+            }
+        });
     },
 
     /**
